@@ -34,14 +34,26 @@ from refusal_mechinterp.scoring.refusal_classifier import heuristic_classify  # 
 FP_NEAR_ZERO_THRESHOLD = 0.05  # tier-(a) refusal rate below this trips the pivot gate
 
 
-def load_items(data_dir: Path) -> list[dict]:
+def load_items(data_dir: Path, *, skip_unresolved: bool = True) -> list[dict]:
+    """Load items from data/matched_triples/*.jsonl. Tier-(c) rows written by
+    build_matched_triples.py before a real sourced item is paired in have
+    prompt_text=None (see docs/DATASET_PLAN.md "Implementation status") — those
+    are skipped by default rather than silently sent to a model as "None"."""
     items = []
+    skipped = 0
     for path in sorted(data_dir.glob("*.jsonl")):
         with path.open() as f:
             for line in f:
                 line = line.strip()
-                if line:
-                    items.append(json.loads(line))
+                if not line:
+                    continue
+                item = json.loads(line)
+                if skip_unresolved and not item.get("prompt_text"):
+                    skipped += 1
+                    continue
+                items.append(item)
+    if skipped:
+        print(f"Skipped {skipped} unresolved item(s) with no prompt_text (see notes field in source jsonl).")
     return items
 
 
@@ -50,15 +62,15 @@ def run(items: list[dict], backend, judge_backend=None) -> list[dict]:
 
     rows = []
     for item in items:
-        result = backend.generate(item["text"])
+        result = backend.generate(item["prompt_text"])
         if judge_backend is not None:
-            classification = llm_judge_classify(item["text"], result.completion, judge_backend)
+            classification = llm_judge_classify(item["prompt_text"], result.completion, judge_backend)
             classifier_used = "llm_judge"
         else:
             classification = heuristic_classify(result.completion)
             classifier_used = "heuristic"
         rows.append({
-            **{k: item[k] for k in ("id", "triple_id", "category", "tier", "topic", "ground_truth_label")},
+            **{k: item[k] for k in ("id", "matched_triple_id", "category", "tier", "focus", "ground_truth_label")},
             "model_id": backend.model_id,
             "completion": result.completion,
             "classification": classification,

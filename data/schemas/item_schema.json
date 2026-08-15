@@ -1,56 +1,56 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "RefusalMechInterp matched-triple item",
+  "description": "Per docs/DATASET_PLAN.md section 2 (supersedes the earlier schema used under docs/BRIEF.md section 3 — field/category names changed 2026-08-15: triple_id->matched_triple_id, text->prompt_text, topic->focus (narrowed to the specific trigger phrase, XSB-style), category names now diet-fasting-tracking/endurance-training-log/supplement-titration/control-risk, source values now constructed/xstest/or-bench).",
   "type": "object",
-  "required": ["id", "triple_id", "category", "tier", "topic", "text", "source", "ground_truth_label"],
+  "required": ["id", "matched_triple_id", "category", "tier", "prompt_text", "focus", "source", "ground_truth_label"],
   "properties": {
     "id": {
       "type": "string",
-      "description": "Unique item id, e.g. 'self_exp_003_a'."
+      "description": "Unique item id, e.g. 'diet-fasting-tracking_003_a'."
     },
-    "triple_id": {
+    "matched_triple_id": {
       "type": "string",
-      "description": "Shared id linking the (a)/(b)/(c) items of one matched triple, e.g. 'self_exp_003'."
+      "description": "Shared id linking the (a)/(b)/(c) items of one matched triple, e.g. 'diet-fasting-tracking_003'."
     },
     "category": {
       "type": "string",
       "enum": [
-        "self_experimentation",
-        "endurance_extreme_sport",
-        "supplement_self_titration",
-        "control_true_positive"
+        "diet-fasting-tracking",
+        "endurance-training-log",
+        "supplement-titration",
+        "control-risk"
       ]
     },
     "tier": {
       "type": "string",
       "enum": ["a", "b", "c"],
-      "description": "a = clearly benign / explicit self-report framing; b = ambiguous, thinner framing; c = genuine-risk analog, no self-report framing (pulled unmodified from source benchmark for the control category, or matched-topic risk analog for the other three)."
+      "description": "a = benign, explicit self-report/control framing; b = ambiguous, framing present but thin; c = genuine-risk analog, framing absent (pulled unmodified from XSTest/OR-Bench for control-risk, or a same-topic risk analog sourced the same way for the other three categories)."
     },
-    "topic": {
-      "type": "string",
-      "description": "Short surface-topic label shared across the triple, e.g. 'extended water fasting'."
-    },
-    "text": {
+    "prompt_text": {
       "type": "string",
       "description": "The prompt text sent to the model."
     },
+    "focus": {
+      "type": "string",
+      "description": "XSB-style annotation: the specific key phrase that may cause refusal (restriction/quantity/timeframe/self-report language). This is the independent variable for Step 1 path patching."
+    },
     "source": {
       "type": "string",
-      "enum": ["or_bench", "xstest", "generated_template"],
-      "description": "Provenance. control_true_positive items MUST be or_bench/xstest, unmodified."
+      "enum": ["constructed", "xstest", "or-bench"],
+      "description": "constructed = authored here (tiers a/b of the three novel categories only). control-risk items and all tier-c items MUST be xstest/or-bench, unmodified."
     },
     "source_id": {
       "type": ["string", "null"],
-      "description": "Original id/index in the source benchmark, if source != generated_template."
+      "description": "Original id/index in the source benchmark, if source != constructed."
     },
     "ground_truth_label": {
       "type": "string",
-      "enum": ["safe", "unsafe"],
-      "description": "Ground-truth safety label, from source benchmark or category construction."
+      "enum": ["safe", "unsafe"]
     },
     "token_spans": {
       "type": "object",
-      "description": "Character-offset spans for Step 1 path-patching token classes. Filled in once tokenization is run against a specific model's tokenizer (offsets are tokenizer-dependent, so this is populated per-model at patching time, not at dataset-build time).",
+      "description": "Character-offset spans for Step 1 path-patching token classes, populated per-model at patching time (tokenizer-dependent), not at dataset-build time.",
       "properties": {
         "numeric_quantity": {"type": "array", "items": {"type": "array", "items": {"type": "integer"}, "minItems": 2, "maxItems": 2}},
         "restriction_verb": {"type": "array", "items": {"type": "array", "items": {"type": "integer"}, "minItems": 2, "maxItems": 2}},
