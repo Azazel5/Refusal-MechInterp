@@ -1,0 +1,37 @@
+# Model + tooling config (docs/BRIEF.md section 2). Fill in provider/access details
+# once compute is chosen; layer numbers and SAE release names below are from the
+# brief and should be verified against Neuronpedia/SAELens at execution time —
+# release ids drift.
+
+models:
+  gemma-3-27b-it:
+    role: primary
+    hf_id: google/gemma-3-27b-it              # verify before use
+    nla_layer: 41
+    sae:
+      library: sae_lens
+      release_family: gemma-scope-2            # verify exact release string on SAELens/Neuronpedia
+      coverage: [resid, mlp_out, attn_out]
+      transcoder_release: gemma-scope-2-transcoder_all  # verify exact release string
+    backend: HFLocalBackend                     # see src/refusal_mechinterp/models/backend.py
+
+  llama-3.3-70b-it:
+    role: cross_architecture_check
+    hf_id: meta-llama/Llama-3.3-70B-Instruct   # verify before use, gated on HF
+    nla_layer: 53
+    sae:
+      library: sae_lens
+      release_family: llama-3.3-70b-sae         # verify exact release string on SAELens/Neuronpedia
+      coverage: [resid]                          # verify actual coverage, likely narrower than Gemma Scope 2
+    backend: HFLocalBackend
+
+refusal_direction:
+  method: mean_difference   # Arditi et al. 2024
+  pairing: matched_triples  # tier (c) vs tier (a), per-triple, rather than a generic corpus
+
+pivot_gate:
+  tier_a_refusal_rate_threshold: 0.05  # see experiments/step0_baseline/run_baseline.py
+
+intervention_success:
+  min_benign_refusal_drop: 0.15  # see experiments/step2_intervention/run_intervention.py
+  max_risk_refusal_drift: 0.05

@@ -1,0 +1,13 @@
+# Scaffolding-stage requirements. Steps 1-3 (activation access, patching, SAEs)
+# need transformer_lens / sae_lens / nnsight against real GPU weights, not yet
+# configured in this environment — install those when compute is chosen.
+
+datasets>=2.19        # scripts/fetch_seed_datasets.py (OR-Bench, XSTest)
+pyyaml>=6.0            # configs/models.yaml
+pandas>=2.2             # results aggregation / 2x2 tables
+
+# Uncomment once GPU/model access is set up (see docs/BRIEF.md, models/backend.py):
+# torch>=2.3
+# transformer_lens>=2.0
+# sae_lens>=4.0
+# nnsight>=0.3

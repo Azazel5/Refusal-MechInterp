@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "RefusalMechInterp matched-triple item",
+  "type": "object",
+  "required": ["id", "triple_id", "category", "tier", "topic", "text", "source", "ground_truth_label"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique item id, e.g. 'self_exp_003_a'."
+    },
+    "triple_id": {
+      "type": "string",
+      "description": "Shared id linking the (a)/(b)/(c) items of one matched triple, e.g. 'self_exp_003'."
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "self_experimentation",
+        "endurance_extreme_sport",
+        "supplement_self_titration",
+        "control_true_positive"
+      ]
+    },
+    "tier": {
+      "type": "string",
+      "enum": ["a", "b", "c"],
+      "description": "a = clearly benign / explicit self-report framing; b = ambiguous, thinner framing; c = genuine-risk analog, no self-report framing (pulled unmodified from source benchmark for the control category, or matched-topic risk analog for the other three)."
+    },
+    "topic": {
+      "type": "string",
+      "description": "Short surface-topic label shared across the triple, e.g. 'extended water fasting'."
+    },
+    "text": {
+      "type": "string",
+      "description": "The prompt text sent to the model."
+    },
+    "source": {
+      "type": "string",
+      "enum": ["or_bench", "xstest", "generated_template"],
+      "description": "Provenance. control_true_positive items MUST be or_bench/xstest, unmodified."
+    },
+    "source_id": {
+      "type": ["string", "null"],
+      "description": "Original id/index in the source benchmark, if source != generated_template."
+    },
+    "ground_truth_label": {
+      "type": "string",
+      "enum": ["safe", "unsafe"],
+      "description": "Ground-truth safety label, from source benchmark or category construction."
+    },
+    "token_spans": {
+      "type": "object",
+      "description": "Character-offset spans for Step 1 path-patching token classes. Filled in once tokenization is run against a specific model's tokenizer (offsets are tokenizer-dependent, so this is populated per-model at patching time, not at dataset-build time).",
+      "properties": {
+        "numeric_quantity": {"type": "array", "items": {"type": "array", "items": {"type": "integer"}, "minItems": 2, "maxItems": 2}},
+        "restriction_verb": {"type": "array", "items": {"type": "array", "items": {"type": "integer"}, "minItems": 2, "maxItems": 2}},
+        "self_report_marker": {"type": "array", "items": {"type": "array", "items": {"type": "integer"}, "minItems": 2, "maxItems": 2}},
+        "timeframe_marker": {"type": "array", "items": {"type": "array", "items": {"type": "integer"}, "minItems": 2, "maxItems": 2}}
+      }
+    },
+    "notes": {"type": "string"}
+  }
+}
