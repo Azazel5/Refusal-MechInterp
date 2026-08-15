@@ -1,13 +1,20 @@
-# Scaffolding-stage requirements. Steps 1-3 (activation access, patching, SAEs)
-# need transformer_lens / sae_lens / nnsight against real GPU weights, not yet
-# configured in this environment — install those when compute is chosen.
+# Scaffolding-stage requirements. Dataset construction + Step 0 dry-runs work with
+# just these three. Everything below the divider is for real execution on
+# Colab/HPC per docs/MODEL_ACQUISITION.md — not needed in this environment (no
+# GPU here), but pinned here so the actual compute environment installs the same
+# stack this code was written against.
 
 datasets>=2.19        # scripts/fetch_seed_datasets.py (OR-Bench, XSTest)
 pyyaml>=6.0            # configs/models.yaml
 pandas>=2.2             # results aggregation / 2x2 tables
 
-# Uncomment once GPU/model access is set up (see docs/BRIEF.md, models/backend.py):
+# --- Real execution (Colab/HPC), per docs/MODEL_ACQUISITION.md section 5 ---
 # torch>=2.3
-# transformer_lens>=2.0
-# sae_lens>=4.0
-# nnsight>=0.3
+# transformers>=4.44
+# accelerate>=0.33
+# bitsandbytes>=0.43          # Step-0-only quantized loads, see backend.py caution
+# sae-lens>=4.0
+# transformer-lens>=2.0        # primary activation-hook engine, see models/backend.py
+# nnsight>=0.3                  # fallback engine if transformer_lens doesn't load a checkpoint cleanly
+# huggingface_hub>=0.24         # scripts/verify_repo_ids.py, scripts/download_models.py
+# sentence-transformers>=3.0    # scripts/resolve_tier_c.py (CPU-friendly, no GPU/gated access needed)

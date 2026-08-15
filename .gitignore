@@ -3,3 +3,4 @@ __pycache__/
 .env
 data/seeds/*.jsonl
 results/**/*.csv
+.DS_Store

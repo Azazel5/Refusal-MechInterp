@@ -1,27 +1,34 @@
-# Model + tooling config (docs/BRIEF.md section 2). Fill in provider/access details
-# once compute is chosen; layer numbers and SAE release names below are from the
-# brief and should be verified against Neuronpedia/SAELens at execution time —
-# release ids drift.
+# Model + tooling config (docs/BRIEF.md section 2, docs/MODEL_ACQUISITION.md).
+# hf_id existence+gating live-checked 2026-08-15 via `curl .../api/models/<id>`
+# (see docs/MODEL_ACQUISITION.md "Implementation status") — both exist and are
+# gated. SAE release strings are still NOT verified (needs sae_lens installed;
+# run scripts/verify_repo_ids.py --check-saelens before trusting them).
+#
+# Llama repo ID: confirmed with the user 2026-08-15 as Llama-3.3-70B-Instruct,
+# NOT meta-llama/Meta-Llama-3-70B (a different, non-instruct, non-3.3 repo that
+# was also floated) — see docs/MODEL_ACQUISITION.md for why that one doesn't fit
+# this project's SAE/NLA-coverage justification.
 
 models:
   gemma-3-27b-it:
     role: primary
-    hf_id: google/gemma-3-27b-it              # verify before use
+    hf_id: google/gemma-3-27b-it              # verified exists+gated 2026-08-15
+    hf_pipeline_tag: image-text-to-text        # Gemma 3 is multimodal — verify AutoModel class at load time, see scripts/download_models.py GEMMA3_NOTE
     nla_layer: 41
     sae:
       library: sae_lens
-      release_family: gemma-scope-2            # verify exact release string on SAELens/Neuronpedia
+      release_family: gemma-scope-2-27b-it-res  # NOT VERIFIED — run scripts/verify_repo_ids.py --check-saelens
       coverage: [resid, mlp_out, attn_out]
-      transcoder_release: gemma-scope-2-transcoder_all  # verify exact release string
-    backend: HFLocalBackend                     # see src/refusal_mechinterp/models/backend.py
+      transcoder_release: gemma-scope-2-27b-it-transcoder  # NOT VERIFIED
+    backend: HFLocalBackend                     # see src/refusal_mechinterp/models/backend.py (transformer_lens engine)
 
   llama-3.3-70b-it:
     role: cross_architecture_check
-    hf_id: meta-llama/Llama-3.3-70B-Instruct   # verify before use, gated on HF
+    hf_id: meta-llama/Llama-3.3-70B-Instruct   # verified exists+gated 2026-08-15; confirmed correct repo with user
     nla_layer: 53
     sae:
       library: sae_lens
-      release_family: llama-3.3-70b-sae         # verify exact release string on SAELens/Neuronpedia
+      release_family: llama-3.3-70b-sae         # NOT VERIFIED — exact string unconfirmed, see docs/MODEL_ACQUISITION.md
       coverage: [resid]                          # verify actual coverage, likely narrower than Gemma Scope 2
     backend: HFLocalBackend
 
